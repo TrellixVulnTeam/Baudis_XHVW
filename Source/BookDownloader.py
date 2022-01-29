@@ -1,4 +1,5 @@
 import codecs
+import os.path
 
 from requests import get
 from bs4 import BeautifulSoup
@@ -7,6 +8,8 @@ from threading import Thread
 from requests_html import HTMLSession
 import sys
 import codecs
+from pathlib import Path
+from pathlib import WindowsPath
 
 poolM = urllib3.PoolManager()
 
@@ -31,9 +34,11 @@ def newDownloadThread(link, filename, path = ''):
     download_thread = threading.Thread(target=loading, args=(link,filename,path))
     download_thread.start()
 
-def loading(link,filename, path = ''):
+def loading(link,filename, path = os.path.expanduser('~/Baudis/SavedBooks')):
     response = poolM.request('GET',link,preload_content = False)
-    with open(path+filename + '.mp3','wb') as out_file:
+    Path(path ).mkdir(parents=True, exist_ok=True)#Create directory for books if not exist
+
+    with open(R'{path}/{filename}.mp3'.format(path=path, filename=filename),'wb') as out_file:
         for chunk in response.stream(1024):
             if chunk:
                 out_file.write(chunk)
