@@ -1,0 +1,86 @@
+#:kivy 2.0.0
+
+<MainMenu>:
+    size_hint: 1, 1
+    orientation: 'vertical'
+    SearchTabs:
+    TextInput:
+        multiline: False
+        padding: 5,0
+        pos_hint: {'x': 0, 'y': 0}
+        size_hint: 1, None
+        size: 0,15
+        font_size: 12
+        text_size: self.size
+        text: 'Search input'
+        foreground_color : 1,1,1,0.7
+        background_color: 0.4, 0.4, 0.4, 1
+    ScrollContainer:
+
+
+
+<ScrollContainer>:
+    size_hint: 1, None
+    size: 0, 320
+    do_scroll_x: False
+
+<SearchTabs>:
+    orientation: 'horizontal'
+    FilterTab:
+        text: 'Author'
+    FilterTab:
+        text: 'Title'
+    FilterTab:
+        text: 'Voicer'
+
+<FilterTab>:
+    halign: 'center'
+    valign: 'middle'
+    size_hint: None, None
+    size: 50, 18
+    font_size: 14
+    text_size: self.size
+    text: 'Text'
+    background_color: 0.5, 0.5, 0.5, 1
+
+
+<ListLayout>:
+    cols: 1
+    padding: 2
+    spacing: 4
+    size_hint: 1, None
+    width: 240
+
+<AudioButton>:
+    size_hint: 1, None
+    size: 0, 15
+    background_color: 0, 0, 0, 1
+    Button:
+        size_hint: 1, 1
+        halign: 'left'
+        valign: 'middle'
+        text: 'Book name Lorem Ipsum'
+        color: 0.5, 0.5, 0.5, 1
+        background_color: 0.3, 0.3, 0.3, 1
+        font_size: 12
+        text_size: self.size
+        padding_x: 5
+
+    RelativeLayout:
+        pos_hint: {'x': .87, 'y': 0}
+        BoxLayout:
+            size: self.size
+            spacing: 4
+            orientation: 'horizontal'
+            Button:
+                size_hint: None, None
+                size: 15,15
+                text_size: 0,0
+                background_color: 0.7, 0.7, 0.7, 1
+            Button:
+                size_hint: None, None
+                size: 15,15
+                text_size: 0,0
+                background_color: 0.7, 0.7, 0.7, 1
+
+
