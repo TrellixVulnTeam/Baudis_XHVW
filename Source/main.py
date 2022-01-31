@@ -28,6 +28,8 @@ class AudioButton(RelativeLayout):
     onLoad = False
     loaded = False
     filepath = ''
+    runAfterLoad = False
+    baudisApp = None
 
     def on_progress(self,percent):
         for child in self.children:
@@ -50,10 +52,22 @@ class AudioButton(RelativeLayout):
         self.loaded = True
         self.onLoad = False
 
+        if self.runAfterLoad == True:
+            self.playBook()
+
     def deleteBook(self, button):
         os.remove(self.filepath)
         self.parent.remove_widget(self)
 
+    def playBook(self, button = None):
+        if self.loaded:
+            if self.runAfterLoad == True:
+                self.runAfterLoad = False
+            os.system('start {filepath}'.format(filepath = self.filepath))
+        elif self.onLoad == False: #Loading book if it not in loading process yet, but now run it after load
+            self.onLoad = True
+            self.runAfterLoad = True
+            link = scraper.downloadBook(self.title, self.baudisApp.booksList[self.title])  # Load & parse web-page of book
 
 
 class ListLayout(GridLayout):
@@ -71,7 +85,8 @@ class FilterTab(Button):
 class DeleteButton(Button):
     audioButton = None
 
-
+class SearchInput(TextInput):
+    pass
 
 class BaudisApp(App):
     booksList = {} #List with loaded and not loaded books
@@ -103,24 +118,17 @@ class BaudisApp(App):
             btn.filepath = os.path.expanduser('~\Baudis\SavedBooks\\') + filename
             filename = filename.removesuffix('.mp3').replace('_',' ')
             btn.title = filename
+            btn.baudisApp = self
             self.booksList[filename] = {'button': btn}
 
             for child in btn.children:
                 if (isinstance(child, Button)):
                     child.text = filename
-                    child.bind(on_press=self.playBook)
+                    child.bind(on_press=btn.playBook)
             self.listLayout.add_widget(btn)
             btn.on_loaded()
 
         return self.root
-
-    def playBook(self, button):
-        audioButton = button.audioButton
-        if audioButton.loaded:
-            os.system('start {filepath}'.format(filepath = audioButton.filepath))
-        elif audioButton.onLoad == False: #Loading book if it not in loading process yet
-            audioButton.onLoad = True
-            link = scraper.downloadBook(audioButton.title, self.booksList[audioButton.title])  # Load & parse web-page of book
 
     def showBooks(self, value):
 
@@ -141,12 +149,13 @@ class BaudisApp(App):
         for title in uniqueBookKeys:
             btn = AudioButton()
             btn.title = title
+            btn.baudisApp = self
             self.booksList[title] = {'link': self.booksList[title],'button': btn}
             for child in btn.children:
                 if isinstance(child, Button):
                     child.text = title
                     child.audioButton = btn
-                    child.bind(on_press=self.playBook)
+                    child.bind(on_press=btn.playBook)
 
             self.listLayout.add_widget(btn)
 

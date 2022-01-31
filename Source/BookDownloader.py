@@ -69,4 +69,5 @@ while True:
     else: print('Unknown command {LinkTitle}'.format(LinkTitle = LinkTitle))
     sys.stdin.flush()
     sys.stdin.close()
+    break
 

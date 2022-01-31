@@ -4,19 +4,21 @@
     size_hint: 1, 1
     orientation: 'vertical'
     SearchTabs:
-    TextInput:
-        multiline: False
-        padding: 5,0
-        pos_hint: {'x': 0, 'y': 0}
-        size_hint: 1, None
-        size: 0,15
-        font_size: 12
-        text_size: self.size
-        text: 'Search input'
-        foreground_color : 1,1,1,0.7
-        background_color: 0.4, 0.4, 0.4, 1
+    SearchInput:
     ScrollContainer:
 
+<SearchInput>:
+    multiline: False
+    padding: 5,0
+    pos_hint: {'x': 0, 'y': 0}
+    size_hint: 1, None
+    size: 0,15
+    font_size: 12
+    text_size: self.size
+    text: 'Search'
+    foreground_color : 1,1,1,0.7
+    background_color: 0.4, 0.4, 0.4, 1
+    on_focus: self.text = '';
 
 
 <ScrollContainer>:
