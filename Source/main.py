@@ -25,6 +25,7 @@ class ScrollContainer(ScrollView):
 
 class AudioButton(RelativeLayout):
     title = ''
+    onLoad = False
     loaded = False
     filepath = ''
 
@@ -33,14 +34,27 @@ class AudioButton(RelativeLayout):
             if (isinstance(child, Button)):
                 percent = percent.strip()
                 child.text = f'Loading: {percent}% {self.title}'
-                child.color = (0, 1 / 100 * int(percent) ,0,1) #than close to complete than greener
+                child.color = (0, 0.2 + 0.7 / 100 * int(percent) ,0,1) #than close to complete than greener
                 return
     def on_loaded(self):
+        #Change color of text to green and remove "Loading" prefix
         for child in self.children:
-            if (isinstance(child, Button)):
+            if isinstance(child, Button):
                 child.text = self.title
                 child.color = (0, 0.9, 0, 1)  # than close to complete than greener
+            elif isinstance(child, RelativeLayout):
+                deleteButton = DeleteButton()
+                deleteButton.audioButton = self
+                deleteButton.bind(on_press=self.deleteBook)
+                child.children[0].add_widget(deleteButton)
         self.loaded = True
+        self.onLoad = False
+
+    def deleteBook(self, button):
+        os.remove(self.filepath)
+        self.parent.remove_widget(self)
+
+
 
 class ListLayout(GridLayout):
     pass
@@ -54,8 +68,7 @@ class MainMenu(BoxLayout):
 class FilterTab(Button):
     pass
 
-class CloseButton(Button):
-    title = ''
+class DeleteButton(Button):
     audioButton = None
 
 
@@ -96,31 +109,18 @@ class BaudisApp(App):
                 if (isinstance(child, Button)):
                     child.text = filename
                     child.bind(on_press=self.playBook)
-                elif isinstance(child, RelativeLayout):
-                    for relativeChild in child.children[0].children:
-                        if isinstance(relativeChild, CloseButton):
-                            relativeChild.title = filename
-                            relativeChild.audioButton = btn
-                            relativeChild.bind(on_press=self.deleteBook)
             self.listLayout.add_widget(btn)
             btn.on_loaded()
 
         return self.root
 
     def playBook(self, button):
-        if self.booksList[button.text]['button'].loaded:
-            os.system('start {filepath}'.format(filepath = self.booksList[button.text]['button'].filepath))
-        else:
-            link = scraper.downloadBook(button.text, self.booksList[button.text])  # Load & parse web-page of book
-
-    def deleteBook(self, button):
-        title = button.title
-        path = os.path.expanduser('~\Baudis\SavedBooks\\')
-        for filename in os.listdir(path):
-            if title in filename:
-                os.remove(path + filename)
-                button.audioButton.parent.remove_widget(button.audioButton)
-
+        audioButton = button.audioButton
+        if audioButton.loaded:
+            os.system('start {filepath}'.format(filepath = audioButton.filepath))
+        elif audioButton.onLoad == False: #Loading book if it not in loading process yet
+            audioButton.onLoad = True
+            link = scraper.downloadBook(audioButton.title, self.booksList[audioButton.title])  # Load & parse web-page of book
 
     def showBooks(self, value):
 
@@ -145,13 +145,8 @@ class BaudisApp(App):
             for child in btn.children:
                 if isinstance(child, Button):
                     child.text = title
+                    child.audioButton = btn
                     child.bind(on_press=self.playBook)
-                elif isinstance(child, RelativeLayout):
-                    for relativeChild in child.children[0].children:
-                        if isinstance(relativeChild,CloseButton):
-                            relativeChild.title = title
-                            relativeChild.audioButton = btn
-                            relativeChild.bind(on_press=self.deleteBook)
 
             self.listLayout.add_widget(btn)
 
