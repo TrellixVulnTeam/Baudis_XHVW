@@ -67,8 +67,8 @@ class AudioButton(RelativeLayout):
         elif self.onLoad == False: #Loading book if it not in loading process yet, but now run it after load
             self.onLoad = True
             self.runAfterLoad = True
-            link = scraper.downloadBook(self.title, self.baudisApp.booksList[self.title])  # Load & parse web-page of book
-
+            scraper.loadQueue.put( self.baudisApp.booksList[self.title] )  # Load & parse web-page of book
+            scraper.sendToSubproc()
 
 class ListLayout(GridLayout):
     pass
@@ -89,7 +89,8 @@ class SearchInput(TextInput):
     pass
 
 class BaudisApp(App):
-    booksList = {} #List with loaded and not loaded books
+    scraper.baudisBooksList = booksList = {} #List with loaded and not loaded books
+
 
     def build(self):
         # create a default grid layout with custom width/height
@@ -129,6 +130,7 @@ class BaudisApp(App):
             btn.on_loaded()
 
         return self.root
+
 
     def showBooks(self, value):
 
