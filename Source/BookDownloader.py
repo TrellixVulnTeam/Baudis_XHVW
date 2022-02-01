@@ -5,6 +5,7 @@ from requests import get
 from bs4 import BeautifulSoup
 import urllib3
 from threading import Thread
+import threading
 from requests_html import HTMLSession
 import sys
 import codecs
@@ -12,8 +13,7 @@ from pathlib import Path
 import asyncio
 
 def runAsyncio():
-    pass
-    #loop.run_forever()
+    loop.run_forever()
 
 def downloadBook(link, title, *largs):
     session = HTMLSession()
@@ -35,7 +35,7 @@ def findDownloadLink(html):
 
 async def loading(link,filename, path = os.path.expanduser('~/Baudis/SavedBooks')):
 
-    response = await poolM.request('GET',link,preload_content = False)#Get file link
+    response = poolM.request('GET',link,preload_content = False)#Get file link
     Path(path ).mkdir(parents=True, exist_ok=True)#Create directory for books if not exist
     contentLength = response.getheader('Content-Length')
     chunkSize = 1024
@@ -65,6 +65,8 @@ thread.start()
 while True:
     # Listening and executing commands from main process
     LinkTitle = sys.stdin.readline()
+    print(True)
+    sys.stdout.write(LinkTitle)
     if(LinkTitle.strip() == 'close'):
         session.close()
         thread.close()

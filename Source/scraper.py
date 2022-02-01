@@ -16,11 +16,13 @@ def runDownloadProcess():
     with subprocess.Popen([sys.executable, 'BookDownloader.py'], stdin=subprocess.PIPE,
                           stdout=subprocess.PIPE, encoding='utf-8') as dUtil:
         downloadUtil = dUtil
+        print('run subproc')
         thread = Thread(target=getFromSubproc, args=(), daemon=True)
         thread.start()
 
 def getFromSubproc():
     while True:
+        print('this1')
         message = downloadUtil.stdout.readline()
         title = re.search(r'Title: \w*;', message).group(0)
         title = title.removeprefix('Title: ')
@@ -52,8 +54,8 @@ def sendToSubproc():
         global downloadUtil
         linkTitle = '-d {link} ||| {title}'.format(link=newLoad['link'], title=newLoad['button'].title)
         downloadUtil.stdin.write(linkTitle)
+        print(linkTitle)
         downloadUtil.stdin.flush()
-        downloadUtil.stdin.close()
         loadQueue.task_done()
     except IOError as e:
         print("error")
