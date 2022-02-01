@@ -15,51 +15,50 @@ baudisBooksList = None
 def runDownloadProcess():
     global downloadUtil
     global runProc
-    with subprocess.Popen([sys.executable, 'BookDownloader.py'], stdin=subprocess.PIPE,
+    with subprocess.Popen([sys.executable, 'BookDownloader.py'], stdin=subprocess.PIPE,  #Freeze
                           stdout=subprocess.PIPE, encoding='utf-8') as dUtil:
         downloadUtil = dUtil
         thread = Thread(target=getFromSubproc, args=(), daemon=True)
         thread.start()
-        while runProc == True:
-            pass
+        dUtil.wait()
+        print('here')
 
 def getFromSubproc():
     while True:
         message = downloadUtil.stdout.readline()
-        print('this' + message)
-        title = re.search(r'Title: \w*;', message).group(0)
-        title = title.removeprefix('Title: ')
-        title = title.removesuffix(';')
+
+        title = re.search(r'Title: .* EndTitle', message)
+        if title != None:
+            title = title.group(0)
+            title = title.removeprefix('Title: ')
+            title = title.removesuffix(' EndTitle')
         if message != '':
             message = message.strip()
-            print(message)
             if 'Load' in message:
-                percent = message.removeprefix('Load: ')
+                percent = re.search(r'Load: .*%',message).group(0)
+                percent = percent.removeprefix('Load: ')
                 percent = percent.removesuffix('%')
 
                 baudisBooksList[title]['button'].on_progress(percent)
-        if('Filepath: ' in message):
-            message = message.removeprefix('Filepath: ')
-            baudisBooksList[title]['button'].filepath = message
-        if 'Close downloader' in message:
+        if 'Filepath: ' in message:
+            filepath = re.search(r'Filepath: .*;',message).group(0)
+            filepath = filepath.removeprefix('Filepath: ')
+            filepath = filepath.removesuffix(';')
+            baudisBooksList[title]['button'].filepath = filepath
             baudisBooksList[title]['button'].on_loaded()
-            downloadUtil.kill()
-            return
 
 
 def sendToSubproc():
     try:  # Check if new book sended to load
-        newLoad = loadQueue.get(block=False)  # lagaet
+       newLoad = loadQueue.get(block=False)
     except queue.Empty as e:
-        return
+       return
 
     try:
         global downloadUtil
         linkTitle = '-d {link} ||| {title}'.format(link=newLoad['link'], title=newLoad['button'].title)
-        downloadUtil.stdin.write(linkTitle)
-        print(linkTitle)
+        downloadUtil.stdin.write(linkTitle + ' \n')
         downloadUtil.stdin.flush()
-        downloadUtil.stdin.close()
         loadQueue.task_done()
     except IOError as e:
         print("error")
