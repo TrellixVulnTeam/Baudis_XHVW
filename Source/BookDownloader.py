@@ -65,8 +65,6 @@ thread.start()
 while True:
     # Listening and executing commands from main process
     LinkTitle = sys.stdin.readline()
-    print(True)
-    sys.stdout.write(LinkTitle)
     if(LinkTitle.strip() == 'close'):
         session.close()
         thread.close()

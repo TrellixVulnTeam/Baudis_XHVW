@@ -9,21 +9,24 @@ import sys
 import queue
 import errno
 
+runProc = True
 downloadUtil = None
 baudisBooksList = None
 def runDownloadProcess():
     global downloadUtil
+    global runProc
     with subprocess.Popen([sys.executable, 'BookDownloader.py'], stdin=subprocess.PIPE,
                           stdout=subprocess.PIPE, encoding='utf-8') as dUtil:
         downloadUtil = dUtil
-        print('run subproc')
         thread = Thread(target=getFromSubproc, args=(), daemon=True)
         thread.start()
+        while runProc == True:
+            pass
 
 def getFromSubproc():
     while True:
-        print('this1')
         message = downloadUtil.stdout.readline()
+        print('this' + message)
         title = re.search(r'Title: \w*;', message).group(0)
         title = title.removeprefix('Title: ')
         title = title.removesuffix(';')
@@ -56,6 +59,7 @@ def sendToSubproc():
         downloadUtil.stdin.write(linkTitle)
         print(linkTitle)
         downloadUtil.stdin.flush()
+        downloadUtil.stdin.close()
         loadQueue.task_done()
     except IOError as e:
         print("error")
