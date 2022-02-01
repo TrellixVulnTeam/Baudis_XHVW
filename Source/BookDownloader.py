@@ -10,10 +10,6 @@ from requests_html import HTMLSession
 import sys
 import codecs
 from pathlib import Path
-import asyncio
-
-def runAsyncio():
-    loop.run_forever()
 
 def downloadBook(link, title, *largs):
     with HTMLSession() as session:
@@ -21,7 +17,8 @@ def downloadBook(link, title, *largs):
         response.html.render()
         response.close()
         downloadLink = findDownloadLink(response)
-        task = asyncio.ensure_future(loading(downloadLink, title))
+        thread = Thread(target=loading, args=(downloadLink, title), daemon=True)
+        thread.start()
 
 def findDownloadLink(html):
     data_bid = html.html.find('div.bookpage--chapters.player--chapters', first = True).attrs['data-bid']
@@ -33,7 +30,7 @@ def findDownloadLink(html):
 
     return downloadLink
 
-async def loading(link,title, path = os.path.expanduser('~/Baudis/SavedBooks')):
+def loading(link,title, path = os.path.expanduser('~/Baudis/SavedBooks')):
 
     response = poolM.request('GET',link,preload_content = False)#Get file link
     Path(path ).mkdir(parents=True, exist_ok=True)#Create directory for books if not exist
@@ -57,9 +54,6 @@ async def loading(link,title, path = os.path.expanduser('~/Baudis/SavedBooks')):
     print(f'Title: {title} EndTitle Download end: Link: {link} Filename: {filename} Filepath: {path}/{filename}.mp3;')
 
 poolM = urllib3.PoolManager()
-loop = asyncio.new_event_loop()
-thread = Thread(target=runAsyncio, args=(),daemon=True)
-thread.start()
 
 while True:
     # Listening and executing commands from main process
