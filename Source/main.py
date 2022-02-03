@@ -75,6 +75,7 @@ class AudioButton(RelativeLayout):
     def deleteBook(self, button):
         os.remove(self.filepath)
         self.parent.remove_widget(self)
+        self.baudisApp.booksList.pop(self.title)
 
     def playBook(self, button = None):
         if self.loaded:
