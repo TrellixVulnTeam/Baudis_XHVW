@@ -13,6 +13,7 @@ from kivy.uix.textinput import TextInput
 from requests_html import HTMLSession
 from multiprocessing import Process, freeze_support
 from kivy.graphics import Color, Rectangle
+from kivy.clock import Clock
 import glob
 import os
 import scraper
@@ -38,6 +39,7 @@ class AudioButton(RelativeLayout):
                 child.text = f'Loading: {percent}% {self.title}'
                 child.color = (0, 0.2 + 0.7 / 100 * int(percent) ,0,1) #than close to complete than greener
                 return
+
     def on_loaded(self):
         #Change color of text to green and remove "Loading" prefix
         for child in self.children:
@@ -55,6 +57,21 @@ class AudioButton(RelativeLayout):
         if self.runAfterLoad == True:
             self.playBook()
 
+    def on_error(self):
+        for child in self.children:
+            if isinstance(child, Button):
+                child.text = 'Load fail: {title}'.format(title=self.title)
+                child.color = (0.8, 0, 0, 1)  # colored title in red
+        self.runAfterLoad = False
+        self.onLoad = False
+        Clock.schedule_once(self.on_unloaded, 3)
+
+    def on_unloaded(self, *largs):
+        for child in self.children:
+            if isinstance(child, Button):
+                child.text = '{title}'.format(title=self.title)
+                child.color = 0.5, 0.5, 0.5, 1
+
     def deleteBook(self, button):
         os.remove(self.filepath)
         self.parent.remove_widget(self)
@@ -63,12 +80,14 @@ class AudioButton(RelativeLayout):
         if self.loaded:
             if self.runAfterLoad == True:
                 self.runAfterLoad = False
-            os.system('start {filepath}'.format(filepath = self.filepath))
+                #os.system('start {filepath}'.format(filepath = self.filepath))
+        elif self.onLoad == True and self.runAfterLoad == False:
+            self.runAfterLoad = True
         elif self.onLoad == False: #Loading book if it not in loading process yet, but now run it after load
             self.onLoad = True
-            self.runAfterLoad = True
             scraper.loadQueue.put( self.baudisApp.booksList[self.title] )  # Load & parse web-page of book
             scraper.sendToSubproc()
+
 
 class ListLayout(GridLayout):
     pass
