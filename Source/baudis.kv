@@ -79,6 +79,22 @@
                 size: 15,15
                 text_size: 0,0
                 background_color: 0.7, 0.7, 0.7, 1
+
+<AddResultsButton>:
+    size_hint: 1, None
+    size: 0, 15
+    background_color: 0, 0, 0, 1
+    Button:
+        size_hint: 1, 1
+        halign: 'center'
+        valign: 'middle'
+        text: 'More Results'
+        color: 0.5, 0.5, 0.5, 1
+        background_color: 0.3, 0.3, 0.3, 1
+        font_size: 12
+        text_size: self.size
+        padding_x: 5
+
 <DeleteButton>:
     padding_x: 3
     padding_y: -2

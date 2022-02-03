@@ -13,6 +13,9 @@ import errno
 runProc = True
 downloadUtil = None
 baudisBooksList = None
+prevTitle = None
+currentPage = 0;
+
 def runDownloadProcess():
     global downloadUtil
     global runProc
@@ -81,13 +84,24 @@ def sendToSubproc():
             raise
 
 
-def search(str):
-    response = get('https://akniga.org/search/books/?q={title}'.format(title=str))
+def search(title = None):
+    global prevTitle
+    global currentPage
+    if title != None:
+        currentPage = 1
+        prevTitle = title
+    else:
+        currentPage += 1
+        title = prevTitle
+    response = get('https://akniga.org/search/books/page{currentPage}/?q={title}'.format(currentPage=currentPage,title=title))
     books = parseBookList(response.text)
     return books
 
 def parseBookList(html):
     soup = BeautifulSoup(html, 'lxml')
+
+    if soup.find('div',_class="ls-blankslate-text") != None :
+        return
     enters = soup.find_all('div', class_='content__main__articles--item')
     entersDict = {}
 
